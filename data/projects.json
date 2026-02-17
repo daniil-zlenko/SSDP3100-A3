@@ -1,0 +1,160 @@
+{
+  "projects": [
+    {
+      "id": "p-2001",
+      "slug": "vanilla-js-game",
+      "title": "Neon Dodger",
+      "tagline": "A fast little arcade game built with pure JavaScript.",
+      "description": "A keyboard-controlled browser game with collision detection, scoring, difficulty scaling, and a restart loop. Built without frameworks to focus on DOM, events, timing, and state.",
+      "active": true,
+      "stack": ["html", "css", "javascript"],
+      "tags": ["dom", "events", "game-loop", "state"],
+      "images": [
+        {
+          "path": "/images/projects/vanilla-js-game/cover.png",
+          "alt": "Neon Dodger title screen with a glowing player icon and score panel",
+          "type": "cover"
+        },
+        {
+          "path": "/images/projects/vanilla-js-game/screen.png",
+          "alt": "Gameplay showing obstacles, score, and remaining lives",
+          "type": "screenshot"
+        }
+      ],
+      "dates": {
+        "created": "2025-09-18",
+        "updated": "2025-10-02"
+      }
+    },
+    {
+      "id": "p-2002",
+      "slug": "react-movie-database",
+      "title": "ReelFinder",
+      "tagline": "Search, filter, and favorite movies in React.",
+      "description": "A React app that consumes a movie API, supports search and filters, shows detail pages, and persists favorites. Focus on components, state, routing, and async fetching.",
+      "active": true,
+      "stack": ["react", "javascript", "css", "api"],
+      "tags": ["spa", "fetch", "routing", "state"],
+      "images": [
+        {
+          "path": "/images/projects/react-movie-database/cover.png",
+          "alt": "ReelFinder home page with a movie search bar and poster grid",
+          "type": "cover"
+        },
+        {
+          "path": "/images/projects/react-movie-database/screen.png",
+          "alt": "Movie detail page with poster, rating, cast list, and favorite button",
+          "type": "screenshot"
+        }
+      ],
+      "dates": {
+        "created": "2025-11-03",
+        "updated": "2025-11-14"
+      }
+    },
+    {
+      "id": "p-2003",
+      "slug": "news-style-landing-page",
+      "title": "Daily Byte",
+      "tagline": "A responsive, news-style landing page.",
+      "description": "A layout-focused project with hero, featured stories, categories, and a responsive grid. Emphasis on typography, spacing, and mobile-first design.",
+      "active": true,
+      "stack": ["html", "css", "sass"],
+      "tags": ["responsive", "grid", "typography", "layout"],
+      "images": [
+        {
+          "path": "/images/projects/news-style-landing-page/cover.png",
+          "alt": "Daily Byte landing page with hero headline and featured stories grid",
+          "type": "cover"
+        },
+        {
+          "path": "/images/projects/news-style-landing-page/screen.png",
+          "alt": "Mobile layout showing stacked story cards and a hamburger menu",
+          "type": "screenshot"
+        }
+      ],
+      "dates": {
+        "created": "2025-10-10",
+        "updated": "2025-10-18"
+      }
+    },
+    {
+      "id": "p-2004",
+      "slug": "node-express-mongo-portfolio",
+      "title": "Portfolio API + Views",
+      "tagline": "A data-driven portfolio powered by Node, Express, and MongoDB.",
+      "description": "Server-rendered portfolio pages backed by MongoDB. Projects load from the database, detail pages use slugs, and an admin route supports basic CRUD for entries.",
+      "active": true,
+      "stack": ["node", "express", "mongodb", "mongoose", "ejs"],
+      "tags": ["server-rendered", "crud", "routing", "database"],
+      "images": [
+        {
+          "path": "/images/projects/node-express-mongo-portfolio/cover.png",
+          "alt": "Portfolio home showing project cards rendered from MongoDB data",
+          "type": "cover"
+        },
+        {
+          "path": "/images/projects/node-express-mongo-portfolio/screen.png",
+          "alt": "Admin screen with project create/edit form and validation messages",
+          "type": "screenshot"
+        }
+      ],
+      "dates": {
+        "created": "2026-01-08",
+        "updated": "2026-02-01"
+      }
+    },
+    {
+      "id": "p-2005",
+      "slug": "ecommerce-site",
+      "title": "Cartonaut",
+      "tagline": "A mini e-commerce site with cart and checkout flow.",
+      "description": "Product listing, product details, cart management, and a mock checkout. Focus on reusable UI components, state management, and basic validation.",
+      "active": false,
+      "stack": ["react", "javascript", "node", "express"],
+      "tags": ["ecommerce", "cart", "forms", "validation"],
+      "images": [
+        {
+          "path": "/images/projects/ecommerce-site/cover.png",
+          "alt": "Cartonaut product grid with filters and a cart badge in the header",
+          "type": "cover"
+        },
+        {
+          "path": "/images/projects/ecommerce-site/screen.png",
+          "alt": "Cart page with line items, quantity controls, and order summary",
+          "type": "screenshot"
+        }
+      ],
+      "dates": {
+        "created": "2025-12-02",
+        "updated": "2025-12-16"
+      }
+    },
+    {
+      "id": "p-2006",
+      "slug": "api-auth-docker-service",
+      "title": "Containerized Notes API",
+      "tagline": "A small API shipped like a grown-up.",
+      "description": "A Node/Express REST API for notes with environment-based config and a Dockerized dev/prod setup. Built to practice deployment-thinking: ports, env vars, and repeatable builds.",
+      "active": false,
+      "stack": ["node", "express", "docker"],
+      "tags": ["rest", "containers", "env", "deployment"],
+      "images": [
+        {
+          "path": "/images/projects/api-auth-docker-service/cover.png",
+          "alt": "Terminal output showing docker compose running the API service",
+          "type": "cover"
+        },
+        {
+          "path": "/images/projects/api-auth-docker-service/screen.png",
+          "alt": "API documentation page showing endpoints and example responses",
+          "type": "screenshot"
+        }
+      ],
+      "dates": {
+        "created": "2026-01-22",
+        "updated": "2026-01-29"
+      }
+    }
+  ]
+}

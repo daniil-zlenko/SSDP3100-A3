@@ -1,0 +1,43 @@
+AI Interaction Log — Node A01 (Portfolio Launchpad)
+Tool Used: ChatGPT
+
+I used AI mainly for help with Express Router structure and for expanding my CSS file from the base version to the final styled version.
+
+Router Help
+
+• Asked how to properly structure and export an Express Router module for page routes.
+  This directly helped with implementing pageRouter.js using:
+  - express.Router()
+  - path.join() with a safe base directory
+  - res.sendFile() for index, about, projects, and contact pages
+  (See pageRouter.js — :contentReference[oaicite:0]{index=0})
+
+• Asked how to structure an API router that reads JSON from disk and exposes:
+  - GET /api/projects
+  - GET /api/projects/:id
+  This helped with organizing apiRouter.js and handling:
+  - fs.readFileSync + JSON.parse
+  - filtering only active projects
+  - returning proper 404 JSON for missing IDs
+  (See apiRouter.js — :contentReference[oaicite:1]{index=1})
+
+• Asked how to safely implement a case-insensitive search filter using req.query.q across:
+  title, tagline, description, stack, and tags.
+
+CSS Help
+
+• Started with a smaller base stylesheet.
+• Asked for help improving layout and spacing for:
+  - project cards
+  - grid layout (#projects-container)
+  - tag chips
+  - project details section
+  - form success/error message styling
+
+• AI suggestions helped expand the stylesheet to include:
+  - hover effects on .project-card
+  - grid layout for .project-images
+  - styled .details-button
+  - .success-message and .error-message blocks
+  (See final styles.css — :contentReference[oaicite:2]{index=2})
+

@@ -1,0 +1,22 @@
+{
+  "name": "node-a01-portfolio-launchpad",
+  "version": "1.0.0",
+  "description": "Node A01 portfolio launchpad assignment",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "portfolio",
+    "assignment"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "morgan": "^1.10.0"
+  }
+}
