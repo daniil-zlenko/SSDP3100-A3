@@ -1,7 +1,7 @@
 {
-  "name": "node-a01-portfolio-launchpad",
-  "version": "1.0.0",
-  "description": "Node A01 portfolio launchpad assignment",
+  "name": "node-a02-view-engine-refactor",
+  "version": "2.0.0",
+  "description": "Node A02 view engine refactor assignment",
   "main": "server.js",
   "scripts": {
     "dev": "node --watch server.js",
@@ -16,7 +16,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ejs": "^4.0.1",
     "express": "^4.21.2",
+    "express-ejs-layouts": "^2.5.1",
     "morgan": "^1.10.0"
   }
 }

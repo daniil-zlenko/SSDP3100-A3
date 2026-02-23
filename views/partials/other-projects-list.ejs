@@ -1,0 +1,13 @@
+<h3>Other Projects</h3>
+<% if (otherProjects && otherProjects.length) { %>
+  <ul class="other-projects">
+    <% otherProjects.forEach(function(p) { %>
+      <li>
+        <a href="/projects/<%= p.slug %>"><%= p.title %></a>
+        <span class="other-project-tagline"><%= p.tagline %></span>
+      </li>
+    <% }); %>
+  </ul>
+<% } else { %>
+  <p>No other projects.</p>
+<% } %>

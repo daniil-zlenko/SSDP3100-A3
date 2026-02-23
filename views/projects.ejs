@@ -1,0 +1,33 @@
+<section class="panel">
+  <h2>Active Projects</h2>
+
+  <form method="GET" action="/projects" class="search-form">
+    <input
+      type="text"
+      name="q"
+      value="<%= q %>"
+      placeholder="Search by title, stack, tags..."
+    />
+    <button type="submit">Search</button>
+    <% if (q) { %>
+      <a href="/projects" class="clear-search">Clear</a>
+    <% } %>
+  </form>
+
+  <% if (q) { %>
+    <p class="search-info">
+      Showing results for <strong>"<%= q %>"</strong> &mdash;
+      <%= projects.length %> project<%= projects.length !== 1 ? 's' : '' %> found.
+    </p>
+  <% } %>
+
+  <% if (projects.length === 0) { %>
+    <p>No projects found<% if (q) { %> matching "<%= q %>"<% } %>.</p>
+  <% } else { %>
+    <div class="projects-grid">
+      <% projects.forEach(function(project) { %>
+        <%- include('partials/project-card', { project: project }) %>
+      <% }); %>
+    </div>
+  <% } %>
+</section>

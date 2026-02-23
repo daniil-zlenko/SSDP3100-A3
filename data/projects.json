@@ -6,7 +6,7 @@
       "title": "Neon Dodger",
       "tagline": "A fast little arcade game built with pure JavaScript.",
       "description": "A keyboard-controlled browser game with collision detection, scoring, difficulty scaling, and a restart loop. Built without frameworks to focus on DOM, events, timing, and state.",
-      "active": true,
+      "status": true,
       "stack": ["html", "css", "javascript"],
       "tags": ["dom", "events", "game-loop", "state"],
       "images": [
@@ -32,7 +32,7 @@
       "title": "ReelFinder",
       "tagline": "Search, filter, and favorite movies in React.",
       "description": "A React app that consumes a movie API, supports search and filters, shows detail pages, and persists favorites. Focus on components, state, routing, and async fetching.",
-      "active": true,
+      "status": true,
       "stack": ["react", "javascript", "css", "api"],
       "tags": ["spa", "fetch", "routing", "state"],
       "images": [
@@ -58,7 +58,7 @@
       "title": "Daily Byte",
       "tagline": "A responsive, news-style landing page.",
       "description": "A layout-focused project with hero, featured stories, categories, and a responsive grid. Emphasis on typography, spacing, and mobile-first design.",
-      "active": true,
+      "status": true,
       "stack": ["html", "css", "sass"],
       "tags": ["responsive", "grid", "typography", "layout"],
       "images": [
@@ -84,7 +84,7 @@
       "title": "Portfolio API + Views",
       "tagline": "A data-driven portfolio powered by Node, Express, and MongoDB.",
       "description": "Server-rendered portfolio pages backed by MongoDB. Projects load from the database, detail pages use slugs, and an admin route supports basic CRUD for entries.",
-      "active": true,
+      "status": true,
       "stack": ["node", "express", "mongodb", "mongoose", "ejs"],
       "tags": ["server-rendered", "crud", "routing", "database"],
       "images": [
@@ -110,7 +110,7 @@
       "title": "Cartonaut",
       "tagline": "A mini e-commerce site with cart and checkout flow.",
       "description": "Product listing, product details, cart management, and a mock checkout. Focus on reusable UI components, state management, and basic validation.",
-      "active": false,
+      "status": false,
       "stack": ["react", "javascript", "node", "express"],
       "tags": ["ecommerce", "cart", "forms", "validation"],
       "images": [
@@ -136,7 +136,7 @@
       "title": "Containerized Notes API",
       "tagline": "A small API shipped like a grown-up.",
       "description": "A Node/Express REST API for notes with environment-based config and a Dockerized dev/prod setup. Built to practice deployment-thinking: ports, env vars, and repeatable builds.",
-      "active": false,
+      "status": false,
       "stack": ["node", "express", "docker"],
       "tags": ["rest", "containers", "env", "deployment"],
       "images": [

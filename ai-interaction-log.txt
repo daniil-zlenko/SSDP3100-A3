@@ -41,3 +41,73 @@ CSS Help
   - .success-message and .error-message blocks
   (See final styles.css — :contentReference[oaicite:2]{index=2})
 
+
+---
+
+AI Interaction Log — Node A02 (View Engine Refactor)
+Tool Used: Claude Sonnet 4.6
+Date: 2026-02-22
+
+I used AI mainly for guidance with setting up the EJS view engine, organizing layouts/partials, and troubleshooting parts of the refactor while converting my A01 project into a templated Express application.
+
+EJS + Layout Setup Help
+
+• Asked how to properly configure EJS with express-ejs-layouts inside an existing Express server.
+  This helped with:
+  - setting the view engine in server.js
+  - defining a default layout
+  - applying a different layout per route using res.render() locals
+  (See server.js configuration)
+
+• Asked how layouts should be structured when EJS does not include built-in layout support.
+  AI explained the recommended structure using:
+  - /views/layouts
+  - shared partials
+  - <%- body %> rendering through express-ejs-layouts
+  This guided creation of:
+  - layout-full.ejs
+  - layout-sidebar.ejs
+
+Repository / Data Access Help
+
+• Asked for an example of separating project data logic from routes.
+  This helped design projects.repository.js with functions such as:
+  - loadAll()
+  - getActive()
+  - search(q) (case-insensitive filtering)
+  - findById() and findBySlug()
+  I implemented and adjusted these functions to match my existing JSON data structure and routing needs.
+
+Views and Partials Help
+
+• Asked for starter examples of reusable EJS partials.
+  AI provided reference examples that helped structure:
+  - nav.ejs
+  - footer.ejs
+  - project-card.ejs
+  - other-projects-list.ejs
+  I modified markup, classes, and content to match assignment requirements and my existing styling.
+
+• Asked how to pass data correctly from routes into EJS templates and fix undefined variable errors during rendering.
+  This helped resolve issues with:
+  - project lists
+  - project detail pages
+  - sidebar layout data passing
+
+Routing + Rendering Help
+
+• Asked how to organize routes into separate routers while keeping A01 API endpoints working.
+  This helped with:
+  - separating pages.routes.js and api.routes.js
+  - maintaining /api/projects behaviour
+  - adding a templated 404 page using EJS rendering.
+
+CSS Help
+
+• Asked for suggestions on adapting existing styles to work with:
+  - sidebar layout
+  - search form placement
+  - footer positioning
+  - project list layout inside templates
+
+• AI suggestions were used as a starting point and then adjusted manually to fit my design.

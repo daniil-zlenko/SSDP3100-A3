@@ -1,0 +1,31 @@
+<article class="project-detail panel">
+  <h2><%= project.title %></h2>
+  <p class="tagline"><strong><%= project.tagline %></strong></p>
+  <p><%= project.description %></p>
+
+  <div class="tags">
+    <% (project.stack || []).forEach(function(tag) { %>
+      <span class="tag"><%= tag %></span>
+    <% }); %>
+  </div>
+
+  <% if (project.tags && project.tags.length) { %>
+    <div class="tags" style="margin-top: 0.5rem;">
+      <% project.tags.forEach(function(tag) { %>
+        <span class="tag tag-secondary"><%= tag %></span>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <% if (project.images && project.images.length) { %>
+    <div class="project-images">
+      <% project.images.forEach(function(img) { %>
+        <img src="<%= img.path %>" alt="<%= img.alt %>" />
+      <% }); %>
+    </div>
+  <% } %>
+
+  <p style="margin-top: 1.5rem;">
+    <a href="/projects">&larr; Back to Projects</a>
+  </p>
+</article>

@@ -1,50 +1,36 @@
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
+const expressLayouts = require("express-ejs-layouts");
 
-const pageRouter = require("./routers/pageRouter");
-const apiRouter = require("./routers/apiRouter");
+const pagesRouter = require("./src/server/routes/pages.routes");
+const apiRouter = require("./src/server/routes/api.routes");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3100;
 
+// View engine
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(expressLayouts);
+app.set("layout", "layouts/layout-full");
+
+// Middleware
 app.use(morgan("dev"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/", pageRouter);
+// Routes
 app.use("/api", apiRouter);
-
-app.post("/contact", (req, res) => {
-  const { name, email, message } = req.body;
-
-  if (!name || !email || !message) {
-    return res.status(400).json({
-      success: false,
-      message: "Please provide name, email, and message."
-    });
-  }
-
-  console.log("Contact submission:", {
-    name,
-    email,
-    message,
-    receivedAt: new Date().toISOString()
-  });
-
-  return res.status(200).json({
-    success: true,
-    message: `Thank you, ${name}! We have received your message.`
-  });
-});
-
 app.use("/api/*", (req, res) => {
   res.status(404).json({ error: "Not found" });
 });
+app.use("/", pagesRouter);
 
+// HTML 404 catch-all
 app.use((req, res) => {
-  res.status(404).send("404 - Page not found");
+  res.status(404).render("404", { title: "Page Not Found" });
 });
 
 app.listen(PORT, () => {

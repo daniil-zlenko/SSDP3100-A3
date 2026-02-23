@@ -1,0 +1,10 @@
+<article class="project-card">
+  <h3><a href="/projects/<%= project.slug %>"><%= project.title %></a></h3>
+  <p><%= project.tagline %></p>
+  <div class="tags">
+    <% (project.stack || []).forEach(function(tag) { %>
+      <span class="tag"><%= tag %></span>
+    <% }); %>
+  </div>
+  <a href="/projects/<%= project.slug %>" class="details-button">View Details</a>
+</article>
