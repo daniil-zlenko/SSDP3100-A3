@@ -1,0 +1,59 @@
+<section class="panel">
+  <h2>Projects</h2>
+  <p>
+    <a href="/admin">&larr; Dashboard</a> &nbsp;
+    <a href="/admin/projects/new" class="btn-primary">+ New Project</a>
+  </p>
+
+  <% if (projects.length === 0) { %>
+    <p>No projects yet.</p>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Slug</th>
+          <th>Category</th>
+          <th>Tags</th>
+          <th>Active</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% projects.forEach(function(project) { %>
+          <tr id="project-<%= project._id %>">
+            <td><%= project.title %></td>
+            <td><code><%= project.slug %></code></td>
+            <td><%= project.categoryId ? project.categoryId.name : '—' %></td>
+            <td><%= (project.tags || []).map(function(t) { return t.name; }).join(', ') %></td>
+            <td><%= project.isActive ? 'Yes' : 'No' %></td>
+            <td class="action-cell">
+              <a href="/admin/projects/<%= project._id %>/edit" class="btn-edit">Edit</a>
+              <button
+                class="btn-delete"
+                data-id="<%= project._id %>"
+                data-type="project"
+              >Delete</button>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } %>
+</section>
+
+<script>
+document.querySelectorAll('.btn-delete[data-type="project"]').forEach(function(btn) {
+  btn.addEventListener('click', async function() {
+    if (!confirm('Delete this project?')) return;
+    const id = this.dataset.id;
+    const res = await fetch('/admin/projects/' + id, { method: 'DELETE' });
+    if (res.ok) {
+      document.getElementById('project-' + id).remove();
+    } else {
+      const data = await res.json();
+      alert(data.error || 'Failed to delete project.');
+    }
+  });
+});
+</script>

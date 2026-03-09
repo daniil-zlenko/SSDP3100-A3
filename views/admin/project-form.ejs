@@ -1,0 +1,57 @@
+<section class="panel">
+  <h2><%= project ? 'Edit Project' : 'New Project' %></h2>
+  <p><a href="/admin/projects">&larr; Projects</a></p>
+
+  <% if (error) { %>
+    <p class="error-message"><%= error %></p>
+  <% } %>
+
+  <form method="POST" action="<%= project ? '/admin/projects/' + project._id : '/admin/projects' %>" class="admin-form">
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input id="title" name="title" type="text" value="<%= project ? project.title : '' %>" required />
+    </div>
+
+    <div class="form-group">
+      <label for="slug">Slug <small>(URL-safe, e.g. "my-project")</small></label>
+      <input id="slug" name="slug" type="text" value="<%= project ? project.slug : '' %>" required />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4" required><%= project ? project.description : '' %></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="categoryId">Category</label>
+      <select id="categoryId" name="categoryId" required>
+        <option value="">— Select a category —</option>
+        <% categories.forEach(function(cat) { %>
+          <option value="<%= cat._id %>" <%= (project && project.categoryId && project.categoryId.toString() === cat._id.toString()) ? 'selected' : '' %>>
+            <%= cat.name %>
+          </option>
+        <% }); %>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="tags">Tags <small>(comma-separated, e.g. "api, auth, node")</small></label>
+      <input
+        id="tags"
+        name="tags"
+        type="text"
+        value="<%= project ? (project.tagsString || (project.tags || []).map(function(t){ return t.name; }).join(', ')) : '' %>"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="isActive">Status</label>
+      <select id="isActive" name="isActive">
+        <option value="true" <%= (!project || project.isActive === true || project.isActive === 'true') ? 'selected' : '' %>>Active (public)</option>
+        <option value="false" <%= (project && (project.isActive === false || project.isActive === 'false')) ? 'selected' : '' %>>Inactive (hidden)</option>
+      </select>
+    </div>
+
+    <button type="submit"><%= project ? 'Update Project' : 'Create Project' %></button>
+  </form>
+</section>

@@ -111,3 +111,42 @@ CSS Help
   - project list layout inside templates
 
 • AI suggestions were used as a starting point and then adjusted manually to fit my design.
+
+
+---
+
+AI Interaction Log — Node A03 (MongoDB Integration + Mini CMS)
+Tool Used: Claude Sonnet 4.6
+Date: 2026-03-03
+
+I used AI for a few small questions during the A03 build — mostly quick lookups and one troubleshooting question.
+
+Mongoose / MongoDB Questions
+
+• Asked what error code Mongoose throws when a unique index constraint is violated.
+  Confirmed it is err.code === 11000 (MongoDB duplicate key error).
+  Used this in adminRoutes.js to show a friendly "slug already exists" message
+  instead of letting the error crash the handler.
+
+• Asked how .populate() behaves when combined with .lean() — specifically whether
+  the populated field comes back as a plain object or a Mongoose document.
+  Confirmed that .lean() converts everything to plain JS objects, so
+  project.categoryId is a plain object after populate, not a Mongoose subdocument.
+  This clarified why I could access project.categoryId.name and .slug directly in EJS.
+
+Route Ordering
+
+• Asked whether Express would interpret "category" as a value for :slug if
+  /projects/category/:slug is defined after /projects/:slug.
+  Confirmed that Express matches routes in registration order, so defining
+  /projects/category/:slug first prevents "category" from being treated as a slug.
+  Applied this in both pageRoutes.js and apiRoutes.js.
+
+Debugging
+
+• Got a "Cannot set headers after they are sent" warning during early testing of
+  the POST /contact handler. Asked what usually causes it.
+  AI explained it typically happens when res.render() or res.redirect() is called
+  more than once in a single request — reminded me to add return before early
+  res.render() calls so the function exits after responding.
+  Fixed by adding return on the missing-fields branch.

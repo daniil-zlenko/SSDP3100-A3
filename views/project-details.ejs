@@ -1,26 +1,18 @@
 <article class="project-detail panel">
   <h2><%= project.title %></h2>
-  <p class="tagline"><strong><%= project.tagline %></strong></p>
-  <p><%= project.description %></p>
 
-  <div class="tags">
-    <% (project.stack || []).forEach(function(tag) { %>
-      <span class="tag"><%= tag %></span>
-    <% }); %>
-  </div>
-
-  <% if (project.tags && project.tags.length) { %>
-    <div class="tags" style="margin-top: 0.5rem;">
-      <% project.tags.forEach(function(tag) { %>
-        <span class="tag tag-secondary"><%= tag %></span>
-      <% }); %>
-    </div>
+  <% if (project.categoryId && project.categoryId.name) { %>
+    <p class="project-category">
+      Category: <a href="/projects/category/<%= project.categoryId.slug %>"><%= project.categoryId.name %></a>
+    </p>
   <% } %>
 
-  <% if (project.images && project.images.length) { %>
-    <div class="project-images">
-      <% project.images.forEach(function(img) { %>
-        <img src="<%= img.path %>" alt="<%= img.alt %>" />
+  <p><%= project.description %></p>
+
+  <% if (project.tags && project.tags.length) { %>
+    <div class="tags">
+      <% project.tags.forEach(function(tag) { %>
+        <a href="/projects?tag=<%= tag.name %>" class="tag"><%= tag.name %></a>
       <% }); %>
     </div>
   <% } %>

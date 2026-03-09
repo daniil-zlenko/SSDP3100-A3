@@ -1,28 +1,36 @@
 <section class="panel">
-  <h2>Active Projects</h2>
+  <h2><% if (typeof category !== 'undefined' && category) { %>Projects in "<%= category.name %>"<% } else { %>Active Projects<% } %></h2>
 
-  <form method="GET" action="/projects" class="search-form">
+  <form method="GET" action="<% if (typeof category !== 'undefined' && category) { %>/projects/category/<%= category.slug %><% } else { %>/projects<% } %>" class="search-form">
     <input
       type="text"
       name="q"
       value="<%= q %>"
-      placeholder="Search by title, stack, tags..."
+      placeholder="Search by title, description, tags..."
+    />
+    <input
+      type="text"
+      name="tag"
+      value="<%= tag %>"
+      placeholder="Filter by tag..."
     />
     <button type="submit">Search</button>
-    <% if (q) { %>
-      <a href="/projects" class="clear-search">Clear</a>
+    <% if (q || tag) { %>
+      <a href="<% if (typeof category !== 'undefined' && category) { %>/projects/category/<%= category.slug %><% } else { %>/projects<% } %>" class="clear-search">Clear</a>
     <% } %>
   </form>
 
-  <% if (q) { %>
+  <% if (q || tag) { %>
     <p class="search-info">
-      Showing results for <strong>"<%= q %>"</strong> &mdash;
-      <%= projects.length %> project<%= projects.length !== 1 ? 's' : '' %> found.
+      <% if (q) { %>Searching for <strong>"<%= q %>"</strong><% } %>
+      <% if (q && tag) { %> &middot; <% } %>
+      <% if (tag) { %>Tag: <strong><%= tag %></strong><% } %>
+      &mdash; <%= projects.length %> project<%= projects.length !== 1 ? 's' : '' %> found.
     </p>
   <% } %>
 
   <% if (projects.length === 0) { %>
-    <p>No projects found<% if (q) { %> matching "<%= q %>"<% } %>.</p>
+    <p>No projects found<% if (q || tag) { %> matching your filters<% } %>.</p>
   <% } else { %>
     <div class="projects-grid">
       <% projects.forEach(function(project) { %>

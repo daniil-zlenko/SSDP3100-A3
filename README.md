@@ -1,94 +1,128 @@
-# Node A02 — View Engine Refactor
+# Node A03 — MongoDB Integration + Mini CMS
 
-A portfolio web app built with Node.js and Express, refactored from A01 to use **EJS** as a server-side view engine with layout templates, shared partials, and a centralized project repository.
+A portfolio web app built with Node.js, Express, EJS, and MongoDB (via Mongoose). Projects, categories, and contact submissions are stored in MongoDB Atlas. Includes a Mini CMS at `/admin` for managing all content.
 
 ## Setup
 
-```bash
-npm install
-npm run dev   # development (auto-restart on file change)
-npm start     # production
+1. Clone the repo and install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Create a `.env` file in the project root (see variables below).
+
+3. Start the server:
+   ```bash
+   npm run dev   # development (auto-restart)
+   npm start     # production
+   ```
+
+Server runs at `http://localhost:3133` (configured via `PORT` in `.env`; code default is `3100` if `PORT` is not set).
+
+## Environment Variables
+
+Create a `.env` file in the project root:
+
+```
+MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/a03
+PORT=3133
 ```
 
-Server runs at `http://localhost:3000` by default.
+| Variable | Description |
+|----------|-------------|
+| `MONGODB_URI` | MongoDB Atlas connection string (required) |
+| `PORT` | Port to run the server on (default: `3100`) |
 
-## View Engine
+> `.env` is listed in `.gitignore` but should be included in the Learning Hub zip upload.
 
-**EJS** via [`express-ejs-layouts`](https://www.npmjs.com/package/express-ejs-layouts).
+## Route Overview
 
-Two layouts:
-- `views/layouts/layout-full.ejs` — header + nav + full-width main + footer (used by all standard pages)
-- `views/layouts/layout-sidebar.ejs` — header + nav + main content + sidebar + footer (used by `/projects/:slug`)
-
-## Routes
-
-### HTML Pages
-
-| Method | Path | View | Description |
-|--------|------|------|-------------|
-| GET | `/` | `index.ejs` | Welcome page |
-| GET | `/about` | `about.ejs` | About page |
-| GET | `/projects` | `projects.ejs` | Server-rendered project list; supports `?q=` search |
-| GET | `/projects/:slug` | `project-details.ejs` | Project detail with sidebar layout |
-| GET | `/contact` | `contact.ejs` | Contact form |
-| POST | `/contact` | `contact-success.ejs` | Logs submission, renders success view |
-| * | any unmatched | `404.ejs` | Templated 404 page |
-
-### API Endpoints
+### Public HTML Routes
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/projects` | Active projects as JSON; supports `?q=` search |
-| GET | `/api/projects/:id` | Single project by ID as JSON, or 404 |
-| * | `/api/*` (unmatched) | JSON `{ "error": "Not found" }` |
+| GET | `/` | Home page |
+| GET | `/about` | About page |
+| GET | `/projects` | Active projects list |
+| GET | `/projects?q=term` | Search filter |
+| GET | `/projects?tag=name` | Filter by tag (case-insensitive) |
+| GET | `/projects?q=term&tag=name` | Combined filter |
+| GET | `/projects/category/:slug` | Projects in a category |
+| GET | `/projects/:slug` | Project detail (shows category + tags) |
+| GET | `/contact` | Contact form |
+| POST | `/contact` | Save submission, re-render with result |
+| * | unmatched non-API | Templated HTML 404 |
 
-## Search
+### Admin Routes (no auth required)
 
-`?q=term` filters by partial, case-insensitive match against: `title`, `tagline`, `description`, `stack[]`, `tags[]`.
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/admin` | Dashboard |
+| GET | `/admin/contacts` | List all contact submissions |
+| PATCH | `/admin/contacts/:id/read` | Toggle isRead → JSON |
+| DELETE | `/admin/contacts/:id` | Delete submission → JSON |
+| GET | `/admin/categories` | List categories with project count |
+| GET | `/admin/categories/new` | New category form |
+| POST | `/admin/categories` | Create category |
+| GET | `/admin/categories/:id/edit` | Edit form |
+| POST | `/admin/categories/:id` | Update, redirect |
+| DELETE | `/admin/categories/:id` | Delete (refused if referenced) → JSON |
+| GET | `/admin/projects` | List all projects |
+| GET | `/admin/projects/new` | New project form |
+| POST | `/admin/projects` | Create project |
+| GET | `/admin/projects/:id/edit` | Edit form |
+| POST | `/admin/projects/:id` | Update, redirect |
+| DELETE | `/admin/projects/:id` | Delete → JSON |
 
-Works on both `/projects?q=` (HTML) and `/api/projects?q=` (JSON).
+### API Routes (JSON)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/projects` | Active projects (supports `?q=` and `?tag=`) |
+| GET | `/api/projects/:id` | Project by ID or JSON 404 |
+| GET | `/api/projects/category/:slug` | Active projects for a category slug |
+| GET | `/api/categories` | Full category list |
+| * | `/api/*` unmatched | JSON `{ "error": "Not found" }` |
 
 ## Project Structure
 
 ```
-/server.js
-/src/server/routes/pages.routes.js
-/src/server/routes/api.routes.js
-/src/server/lib/projects.repository.js
-/views/layouts/layout-full.ejs
-/views/layouts/layout-sidebar.ejs
-/views/partials/nav.ejs
-/views/partials/footer.ejs
-/views/partials/project-card.ejs
-/views/partials/other-projects-list.ejs
-/views/index.ejs
-/views/about.ejs
-/views/projects.ejs
-/views/project-details.ejs
-/views/contact.ejs
-/views/contact-success.ejs
-/views/404.ejs
-/data/projects.json
-/public/css/styles.css
-/public/images/projects/<slug>/
+server.js
+models/
+  Category.js
+  Project.js
+  Contact.js
+services/
+  projectService.js     ← centralized filtering logic
+routes/
+  pageRoutes.js         ← public HTML routes
+  adminRoutes.js        ← admin HTML + JSON actions
+  apiRoutes.js          ← JSON API routes
+views/
+  layouts/
+    layout-full.ejs
+    layout-sidebar.ejs
+  partials/
+    nav.ejs
+    footer.ejs
+    project-card.ejs
+    other-projects-list.ejs
+  admin/
+    dashboard.ejs
+    contacts.ejs
+    categories.ejs
+    category-form.ejs
+    projects.ejs
+    project-form.ejs
+  index.ejs
+  about.ejs
+  projects.ejs
+  project-details.ejs
+  contact.ejs
+  404.ejs
+public/
+  css/styles.css
+  images/projects/<slug>/
+data/
+  projects.json         ← legacy A02 data (not used by server)
 ```
-
-## Data
-
-Projects loaded from `/data/projects.json`. Top-level shape: `{ "projects": [...] }`. Each project has an `active` boolean field; only active projects appear on the HTML and API list endpoints.
-
-## Key Changes from A01
-
-- `res.sendFile()` replaced by `res.render()` with EJS views
-- `/routers/` moved to `/src/server/routes/`
-- Contact POST renders a success page instead of returning JSON
-- Projects list is now server-rendered (no client-side fetch)
-- `/projects/:slug` detail page uses sidebar layout with server-rendered "Other Projects"
-- All data access logic centralized in `projects.repository.js`
-
-## Notes / Assumptions
-
-- Static assets served from `public/`.
-- `/api/projects` and `/projects` return only projects where `active === true`.
-- `/api/projects/:id` can return active or inactive projects by ID.
-- Unknown `/api/*` routes return JSON 404; other unmatched routes return a templated HTML 404.

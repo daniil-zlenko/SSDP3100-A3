@@ -1,9 +1,14 @@
 <article class="project-card">
   <h3><a href="/projects/<%= project.slug %>"><%= project.title %></a></h3>
-  <p><%= project.tagline %></p>
+  <p><%= project.description %></p>
+  <% if (project.categoryId && project.categoryId.name) { %>
+    <p class="project-category">
+      <a href="/projects/category/<%= project.categoryId.slug %>"><%= project.categoryId.name %></a>
+    </p>
+  <% } %>
   <div class="tags">
-    <% (project.stack || []).forEach(function(tag) { %>
-      <span class="tag"><%= tag %></span>
+    <% (project.tags || []).forEach(function(tag) { %>
+      <a href="/projects?tag=<%= tag.name %>" class="tag"><%= tag.name %></a>
     <% }); %>
   </div>
   <a href="/projects/<%= project.slug %>" class="details-button">View Details</a>

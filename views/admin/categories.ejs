@@ -1,0 +1,58 @@
+<section class="panel">
+  <h2>Categories</h2>
+  <p>
+    <a href="/admin">&larr; Dashboard</a> &nbsp;
+    <a href="/admin/categories/new" class="btn-primary">+ New Category</a>
+  </p>
+
+  <% if (categories.length === 0) { %>
+    <p>No categories yet.</p>
+  <% } else { %>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Slug</th>
+          <th>Description</th>
+          <th>Projects</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% categories.forEach(function(cat) { %>
+          <tr id="category-<%= cat._id %>">
+            <td><%= cat.name %></td>
+            <td><code><%= cat.slug %></code></td>
+            <td><%= cat.description || '—' %></td>
+            <td><%= cat.projectCount %></td>
+            <td class="action-cell">
+              <a href="/admin/categories/<%= cat._id %>/edit" class="btn-edit">Edit</a>
+              <button
+                class="btn-delete"
+                data-id="<%= cat._id %>"
+                data-type="category"
+                <%= cat.projectCount > 0 ? 'disabled title="Cannot delete: category has projects"' : '' %>
+              >Delete</button>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } %>
+</section>
+
+<script>
+document.querySelectorAll('.btn-delete[data-type="category"]').forEach(function(btn) {
+  btn.addEventListener('click', async function() {
+    if (!confirm('Delete this category?')) return;
+    const id = this.dataset.id;
+    const res = await fetch('/admin/categories/' + id, { method: 'DELETE' });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('category-' + id).remove();
+    } else {
+      alert(data.error || 'Failed to delete category.');
+    }
+  });
+});
+</script>

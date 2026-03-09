@@ -1,0 +1,419 @@
+A03 CHANGES LOG
+===============
+Changes from A02 (view engine + JSON data) to A03 (MongoDB Atlas + Mongoose + Mini CMS)
+========================================================================================
+
+
+── DEPENDENCIES ────────────────────────────────────────────────────────────────
+
+package.json
+  CHANGED: name "node-a02-view-engine-refactor" → "node-a03-mongodb-integration"
+  CHANGED: version "2.0.0" → "3.0.0"
+  CHANGED: description updated to reflect A03 purpose
+  ADDED:   "dotenv" dependency
+           WHY: loads MONGODB_URI and PORT from .env into process.env at startup
+  ADDED:   "mongoose" dependency
+           WHY: ODM (Object Document Mapper) for MongoDB; provides schema
+                validation, model querying, and connection management
+
+
+── CONFIGURATION ───────────────────────────────────────────────────────────────
+
+.env  (already existed, unchanged)
+  Contains MONGODB_URI and PORT.
+  WHY: keeps credentials out of source code; never committed to git.
+
+.gitignore
+  CHANGED: removed duplicate ".env" line (it appeared twice)
+  WHY: duplicate entry was harmless but untidy; one entry is sufficient.
+
+
+── SERVER ENTRY POINT ──────────────────────────────────────────────────────────
+
+server.js  (rewritten)
+  REMOVED: require("./src/server/routes/pages.routes") and
+           require("./src/server/routes/api.routes")
+           WHY: those paths pointed to A02 route files that served data from
+                the JSON file, not MongoDB. They are replaced by the new
+                routes/ directory.
+
+  ADDED:   require("dotenv").config() at the very top
+           WHY: must run before any process.env reads so PORT and MONGODB_URI
+                are available.
+
+  ADDED:   require("mongoose")
+           WHY: needed to open the MongoDB connection.
+
+  ADDED:   require("./routes/pageRoutes"),
+           require("./routes/apiRoutes"),
+           require("./routes/adminRoutes")
+           WHY: new route files that use Mongoose models instead of JSON.
+
+  ADDED:   app.use("/admin", adminRoutes)
+           WHY: mounts the Mini CMS under /admin as required by A03.
+
+  ADDED:   MONGODB_URI guard — process.exit(1) with clear error if not set
+           WHY: requirement says "app fails gracefully if DB connection is
+                missing (clear error, not silent crash)". An undefined URI
+                would cause a cryptic Mongoose error; this exits early with a
+                readable message.
+
+  ADDED:   mongoose.connect(...).then(() => app.listen(...)).catch(exit)
+           WHY: server only starts listening once the database is reachable.
+                If the connection fails the process exits with an explanation
+                rather than starting a broken server.
+
+
+── MONGOOSE MODELS (all new) ───────────────────────────────────────────────────
+
+models/Category.js  (new file)
+  WHY: A03 requires a Category collection. Centralizing the schema in its own
+       file keeps model definitions separate from route logic. Fields:
+       - name (String, required): human-readable label
+       - slug (String, required, unique): URL-safe identifier used in routes
+         like /projects/category/:slug
+       - description (String, optional): shown in the admin list
+
+models/Project.js  (new file)
+  WHY: replaces the JSON array in data/projects.json. Mongoose provides
+       schema enforcement and query helpers. Fields:
+       - slug (String, required, unique): used for /projects/:slug routes
+       - title, description (String, required): core display fields
+       - isActive (Boolean, required): controls public visibility; only
+         isActive === true projects appear on the public site and API
+       - tags ([{ name: String }]): embedded sub-documents instead of plain
+         strings so they can be queried with dot-notation ("tags.name")
+       - categoryId (ObjectId, ref Category, required): foreign key link;
+         using .populate("categoryId") in queries joins in the full category
+         object
+
+models/Contact.js  (new file)
+  WHY: A03 requires contact form submissions to be saved to MongoDB.
+       Previously POST /contact only rendered a response without persisting
+       anything. Fields:
+       - name, email, message (String, required): form inputs
+       - postedDate (Date, default Date.now): timestamp for sorting in admin
+       - isRead (Boolean, default false): lets admin track new submissions
+
+
+── SERVICES (new) ──────────────────────────────────────────────────────────────
+
+services/projectService.js  (new file)
+  WHY: the requirements explicitly state "centralized helper/service for
+       filtering logic — no copy-paste query logic across routes". Without
+       this, both pageRoutes and apiRoutes would duplicate the same Mongoose
+       filter-building logic for ?q= and ?tag= queries.
+
+  buildFilter(q, tag, extraFilter)
+       Builds a Mongoose filter object from optional search term, tag, and
+       a base filter (e.g. { isActive: true }). Uses $or with regex for the
+       text search and a case-insensitive regex for tag matching. Used by all
+       three query entry points.
+
+  getActiveProjects(q, tag)
+       Calls buildFilter with isActive: true, then runs Project.find().
+       Used by GET /projects and GET /api/projects.
+
+  getActiveProjectsByCategorySlug(slug, q, tag)
+       Looks up the category by slug first, then filters projects by
+       categoryId. Returns both the category and the projects so the view
+       can display the category name. Used by GET /projects/category/:slug
+       and GET /api/projects/category/:slug.
+
+
+── ROUTES (all new files) ──────────────────────────────────────────────────────
+
+routes/pageRoutes.js  (new file)
+  Replaces: routers/pageRouter.js (old A01 file that used res.sendFile)
+  WHY: A02's pageRouter.js still called res.sendFile() pointing at static
+       .html files in a /pages/ directory — it was never updated to use EJS.
+       The new file uses res.render() and pulls live data from MongoDB.
+
+  GET /
+       Renders index.ejs. No data needed.
+
+  GET /about
+       Renders about.ejs. No data needed.
+
+  GET /projects  (supports ?q= and ?tag=)
+       Calls getActiveProjects() from projectService.
+       Passes q and tag to the view so the search form can repopulate and
+       display filter info.
+
+  GET /projects/category/:slug
+       Calls getActiveProjectsByCategorySlug().
+       Returns 404 if the category slug is not found.
+       Passes category to projects.ejs so the heading updates to
+       "Projects in <category name>".
+       NOTE: this route is defined BEFORE /projects/:slug to prevent Express
+       from interpreting "category" as a slug value.
+
+  GET /projects/:slug
+       Finds one active project by slug with .populate("categoryId").
+       Also loads other active projects for the sidebar.
+       Returns 404 if the slug is not found or the project is inactive.
+
+  GET /contact
+       Renders contact.ejs with empty success/error/fields state.
+
+  POST /contact
+       Validates that name, email, and message are all present.
+       On missing fields: re-renders with an error and repopulates the form.
+       On success: saves a Contact document and re-renders with a success
+       message (same view, no redirect needed).
+
+routes/apiRoutes.js  (new file)
+  Replaces: routers/apiRouter.js (old file reading from projects.json)
+  WHY: old router read from a static JSON file; A03 requires all data to
+       come from MongoDB.
+
+  GET /api/projects  (supports ?q= and ?tag=)
+       Returns active projects as JSON using getActiveProjects().
+
+  GET /api/projects/category/:slug
+       NOTE: defined before /api/projects/:id so "category" is not treated
+       as a MongoDB ObjectId.
+       Returns active projects for a category as JSON, or 404 if the
+       category slug doesn't exist.
+
+  GET /api/projects/:id
+       Finds a project by MongoDB _id.
+       Handles CastError (invalid ObjectId format) gracefully as a 404.
+
+  GET /api/categories
+       Returns all categories as JSON (read-only per requirements).
+
+routes/adminRoutes.js  (new file)
+  WHY: A03 requires a Mini CMS for managing categories, projects, and
+       contact submissions. No equivalent existed in A02.
+
+  GET /admin
+       Renders the dashboard with links to each admin section.
+
+  -- Contacts --
+  GET /admin/contacts
+       Lists all submissions sorted newest-first.
+
+  PATCH /admin/contacts/:id/read
+       Toggles the isRead boolean and returns JSON with the new state.
+       The view uses fetch() to update the UI without a page reload.
+
+  DELETE /admin/contacts/:id
+       Deletes the document and returns JSON. The view removes the row
+       from the DOM on success.
+
+  -- Categories --
+  GET /admin/categories
+       Lists categories with a per-category project count. The count is
+       computed via Project.aggregate() and merged into each category object
+       so the view can disable the Delete button when count > 0.
+
+  GET /admin/categories/new
+  POST /admin/categories
+       Create flow. On duplicate slug (code 11000) re-renders the form with
+       a friendly message instead of crashing.
+
+  GET /admin/categories/:id/edit
+  POST /admin/categories/:id
+       Update flow. Same duplicate-slug handling.
+
+  DELETE /admin/categories/:id
+       SAFE DELETION: counts projects referencing the category first. If
+       count > 0 returns HTTP 400 with a friendly error message. The UI also
+       disables the button when count > 0, but the server enforces it
+       independently. Returns JSON.
+
+  -- Projects --
+  GET /admin/projects
+       Lists all projects (active and inactive) with category and tags.
+
+  GET /admin/projects/new
+  POST /admin/projects
+       Create flow. Tags are entered as a comma-separated string in the form
+       and converted to [{ name }] objects before saving. isActive comes in
+       as the string "true"/"false" from the form and is coerced to Boolean.
+
+  GET /admin/projects/:id/edit
+       Loads the project and converts the tags array back to a
+       comma-separated string (tagsString) for the form input.
+
+  POST /admin/projects/:id
+       Update flow. Same tag and isActive handling as create.
+
+  DELETE /admin/projects/:id
+       Deletes and returns JSON.
+
+
+── VIEWS — UPDATED ─────────────────────────────────────────────────────────────
+
+views/projects.ejs
+  CHANGED: heading now shows "Projects in '<category name>'" when a category
+           filter is active, otherwise shows "Active Projects".
+           WHY: /projects/category/:slug reuses this view; the heading needs
+           to reflect context.
+
+  ADDED:   tag filter <input name="tag"> alongside the existing q input
+           WHY: A03 requires ?tag= filtering on the projects page.
+
+  CHANGED: "Clear" link and form action are now conditional on whether a
+           category context is active, so clearing within a category page
+           stays within that category.
+
+  CHANGED: search info line now handles q, tag, or both together.
+
+views/project-details.ejs
+  REMOVED: <p class="tagline"> — A03 Project model has no tagline field
+  REMOVED: project.stack display — A03 Project model has no stack field;
+           stack was an A01/A02 concept from the JSON data
+  REMOVED: project.images display — A03 Project model has no images field;
+           image upload is described as coming in A04
+  CHANGED: tags loop from `<%= tag %>` (plain string) to `<%= tag.name %>`
+           WHY: A03 tags are embedded objects { name: String }, not strings
+  ADDED:   category display with a link to /projects/category/:slug
+           WHY: A03 requirement "project detail shows category + tags"
+
+views/contact.ejs
+  ADDED:   success/error message blocks at the top
+           WHY: POST /contact now re-renders this view with a result message
+                instead of redirecting to a separate success page
+  ADDED:   value="<%= fields.name || '' %>" etc. on all inputs
+           WHY: on validation failure, the form repopulates with what the
+                user already typed so they don't have to retype everything
+
+views/partials/project-card.ejs
+  REMOVED: `<p><%= project.tagline %></p>` — no tagline in A03 model
+  REMOVED: project.stack loop — no stack field in A03 model
+  CHANGED: tags loop from plain strings to `<%= tag.name %>` objects
+  CHANGED: tag <span> elements are now <a href="/projects?tag=..."> links
+           WHY: A03 requires tag filtering; clicking a tag on a card is the
+                natural way to trigger it
+  ADDED:   category link above the tags
+           WHY: provides quick navigation from a project card to its category
+
+views/partials/other-projects-list.ejs
+  REMOVED: `<span class="other-project-tagline"><%= p.tagline %></span>`
+           WHY: A03 Project model has no tagline field; rendering it would
+                output "undefined" for every item in the sidebar
+
+views/partials/nav.ejs
+  ADDED:   <a href="/admin">Admin</a>
+           WHY: A03 requires admin routes to be accessible; no authentication
+                is required in A03 so the link is always visible
+
+
+── VIEWS — NEW ─────────────────────────────────────────────────────────────────
+
+views/admin/dashboard.ejs
+  WHY: landing page for /admin with links to each section.
+
+views/admin/contacts.ejs
+  WHY: displays all contact submissions in a table with date, name, email,
+       message, read status, and action buttons.
+       Toggle-read and delete use fetch() so the page doesn't reload; the
+       row is updated/removed in the DOM directly.
+
+views/admin/categories.ejs
+  WHY: lists categories with project reference counts. The Delete button is
+       rendered as disabled when projectCount > 0 so users can see at a
+       glance why they can't delete a category with active projects.
+
+views/admin/category-form.ejs
+  WHY: shared create/edit form for categories. The form action and heading
+       adapt based on whether `category` is null (create) or an object
+       (edit).
+
+views/admin/projects.ejs
+  WHY: lists all projects (active and inactive) with their category and
+       tags. Delete uses fetch() for in-place row removal.
+
+views/admin/project-form.ejs
+  WHY: shared create/edit form for projects. Handles:
+       - category dropdown populated from the categories collection
+       - tags as a comma-separated text input (converted to [{ name }] in
+         the route handler)
+       - isActive as a select with "Active" / "Inactive" options
+       The selected category and current isActive value are pre-selected
+       when editing an existing project.
+
+
+── CSS ──────────────────────────────────────────────────────────────────────────
+
+public/css/styles.css
+  ADDED:   .panel — card-style box used by all content sections
+           WHY: gives the site a consistent contained look; previously the
+                EJS views referenced this class but it had no definition.
+
+  ADDED:   .project-category — small label shown on project cards and detail
+           pages linking to the category route
+
+  CHANGED: .tag — converted from just background styling to also include
+           display: inline-block and text-decoration: none
+           WHY: tags are now <a> links; they need to look like tags, not
+                underlined hyperlinks.
+
+  ADDED:   .tag:hover rule
+           WHY: provides visual feedback when hovering over clickable tags.
+
+  ADDED:   Admin-specific styles:
+           .admin-links, .admin-table, .admin-table th/td, .message-cell,
+           .action-cell, .badge, .badge-unread, .badge-read,
+           .btn-primary, .btn-edit, .btn-toggle-read, .btn-delete,
+           .admin-form select/textarea, .admin-form .form-group
+           WHY: all admin views use these classes; without them the admin
+                pages would be completely unstyled.
+
+  ADDED:   .is-read / .is-unread row classes toggled by the PATCH response
+           WHY: unread contacts are shown in bold so they stand out.
+
+
+── README.md ────────────────────────────────────────────────────────────────────
+
+README.md  (rewritten)
+  REMOVED: all A02-specific content (view engine overview, A01 comparison,
+           project structure listing old /src/server paths)
+  ADDED:   setup steps including .env creation
+  ADDED:   environment variables table (MONGODB_URI, PORT)
+  ADDED:   full route overview table covering public HTML, admin, and API
+  ADDED:   updated project structure tree reflecting actual A03 file layout
+  WHY:     requirement explicitly lists README with setup steps, env vars,
+           and route overview as a submission item.
+
+
+── FILES NOT TOUCHED (intentionally kept) ──────────────────────────────────────
+
+data/projects.json
+  WHY: left in place as legacy reference data. The server no longer reads
+       it, but it serves as the source of truth used when manually entering
+       the initial project data through the admin forms.
+
+routers/apiRouter.js
+routers/pageRouter.js
+  WHY: old A01/A02 files. Not used by server.js anymore (server.js now
+       imports from routes/ not routers/). Left in place rather than
+       deleted to preserve the A02 submission history in git.
+
+src/server/routes/api.routes.js
+src/server/routes/pages.routes.js
+src/server/lib/projects.repository.js
+  WHY: same reasoning as above — A02 artifacts preserved in git history.
+       Server no longer requires them.
+
+pages/ directory (index.html, about.html, projects.html, contact.html)
+  WHY: A01 static HTML files. Not served by the current server.js. Kept
+       to preserve the progression from A01 → A02 → A03.
+
+public/js/projects.js
+public/js/contact.js
+  WHY: client-side scripts from A01/A02. The current server renders
+       everything server-side so these are not loaded. Kept to avoid
+       unintentional loss of prior work.
+
+views/contact-success.ejs
+  WHY: A02 used a separate success view after POST /contact. A03 re-renders
+       contact.ejs with a success message instead, making this file unused.
+       Left in place rather than deleted.
+
+public/images/
+  WHY: unchanged; image assets are kept for visual reference even though
+       the A03 Project model does not include an images field (that is
+       scoped to A04 per the requirements).

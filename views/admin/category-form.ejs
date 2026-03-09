@@ -1,0 +1,27 @@
+<section class="panel">
+  <h2><%= category ? 'Edit Category' : 'New Category' %></h2>
+  <p><a href="/admin/categories">&larr; Categories</a></p>
+
+  <% if (error) { %>
+    <p class="error-message"><%= error %></p>
+  <% } %>
+
+  <form method="POST" action="<%= category ? '/admin/categories/' + category._id : '/admin/categories' %>" class="admin-form">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" value="<%= category ? category.name : '' %>" required />
+    </div>
+
+    <div class="form-group">
+      <label for="slug">Slug <small>(URL-safe, e.g. "web-dev")</small></label>
+      <input id="slug" name="slug" type="text" value="<%= category ? category.slug : '' %>" required />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description <small>(optional)</small></label>
+      <textarea id="description" name="description" rows="3"><%= category ? (category.description || '') : '' %></textarea>
+    </div>
+
+    <button type="submit"><%= category ? 'Update Category' : 'Create Category' %></button>
+  </form>
+</section>
